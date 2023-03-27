@@ -13,7 +13,6 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-//import kotlinx.coroutines.DefaultExecutor.delay
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.PrintWriter
@@ -21,7 +20,7 @@ import java.io.PrintWriter
 /**
  * Class for working with code text
  */
-class CodeTranformer() {
+class CodeTransformer {
     private val keyWords =
         listOf("for", "while", "do", "if", "else", "when", "new", "throw", "var", "val", "fun")
     private val separators = listOf(',', ';', '(', ')', '{', '}')
@@ -39,14 +38,14 @@ class CodeTranformer() {
     fun highlightCode(codeText: AnnotatedString): TransformedText {
         val anString = AnnotatedString.Builder().run {
             append(codeText)
-            var prevQuote = -1;
+            var prevQuote = -1
             for (currentPosition in codeText.indices) {
                 if (codeText[currentPosition] == '"') {
-                    if (prevQuote != -1) {
+                    prevQuote = if (prevQuote != -1) {
                         addStyle(SpanStyle(color = Color.Yellow), prevQuote, currentPosition + 1)
-                        prevQuote = -1
+                        -1
                     } else {
-                        prevQuote = currentPosition
+                        currentPosition
                     }
                 }
                 if (prevQuote != -1) { // we are inside string, no other highlight
@@ -81,7 +80,7 @@ fun App() {
     val errorsFile = File("src/script_files/errors.txt")
     val kotlinScriptFile = File("src/script_files/script.kts")
 
-    val codeTransformer = CodeTranformer()
+    val codeTransformer = CodeTransformer()
     var codeText by remember { mutableStateOf("") }
 
     var output by remember { mutableStateOf(outputFile.readText()) }
@@ -179,8 +178,8 @@ fun App() {
                     scriptProcess?.destroy()
                     scriptThread = Thread {
                         runningStatus = "Running"
-                        val writer = PrintWriter(kotlinScriptFile);
-                        writer.print(codeText);
+                        val writer = PrintWriter(kotlinScriptFile)
+                        writer.print(codeText)
                         writer.close()
                         try {
                             scriptProcess = process.start()
@@ -221,7 +220,7 @@ fun App() {
                         text = if (exitCode == null) {
                             ""
                         } else {
-                            "Last return code is " + exitCode
+                            "Last return code is $exitCode"
                         }
                     )
                 }
